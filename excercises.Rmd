@@ -37,7 +37,7 @@ knitr::kable(
   digits=1, align=rep('c', 5))
   
 knitr::kable(
-  head(heating %>% mutate(homes = as.numeric(homes)), 10),
+  head(heating %>% mutate(homes = as.numeric(homes)), 7),
    digits=1, align=rep('c', 5))
 
 knitr::kable(
