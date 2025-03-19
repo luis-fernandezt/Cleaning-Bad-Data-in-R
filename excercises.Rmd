@@ -14,7 +14,8 @@ knitr::opts_chunk$set(
 
 ## 1.2 Missing Fields
 
-After loading the heating data I need to transform and format some values. When I apply mutate to transform homes `heating %>% mutate(homes = as.numeric(homes))` from Class: character, R show me a \textcolor{red}{Caused by warning: ! NAs introducidos por coerción}. Then I ask for the data using a filter and found characters values (".", "Z"). Finally mutate the values to zero after check with other sources. \
+After loading the heating data I need to transform and format some values. When I apply mutate to transform homes `heating %>% mutate(homes = as.numeric(homes))` from Class: character, R show me a \textcolor{red}{Caused by warning: ! NAs introducidos por coerción}. Then I ask for the data using a filter and found characters values (".", "Z"). Finally mutate the values to zero after check with other sources. 
+\
 
 ```{r library, echo = TRUE,	message = FALSE,	warning = FALSE}
 # Load the tidyverse
