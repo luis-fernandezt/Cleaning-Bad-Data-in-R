@@ -12,7 +12,9 @@ knitr::opts_chunk$set(
 	warning = FALSE)
 ```
 
-## 1.2 Missing Fields
+# 1. Missing Data
+
+## 1.2. Missing Fields
 
 After loading the heating data I need to transform and format some values. When I apply mutate to transform homes `heating %>% mutate(homes = as.numeric(homes))` from Class: character, R show me a \textcolor{red}{Caused by warning: ! NAs introducidos por coerción}. Then I ask for the data using a filter and found characters values (".", "Z"). Finally mutate the values to zero after check with other sources. 
 \
@@ -21,7 +23,6 @@ After loading the heating data I need to transform and format some values. When 
 # Load the tidyverse
 library(tidyverse)
 ```
-
 
 
 ```{r exc1, include=TRUE, echo=TRUE, warning = TRUE}
@@ -59,4 +60,472 @@ heating <-
 
 ```
 
+\newpage
+
+## 1.3. Missing Rows
+
+\colorbox{yellow}{In this exercise I have lands acres from USA, but there are just 42 obs, however the count of states are 50.} \
+\colorbox{yellow}{So is necessary create a data table in tiddy format with the other ones.} \
+
+```{r Missing Rows, echo=TRUE, warning = TRUE}
+
+# Load the data file
+land <- read_csv("./exercise_files/1_3/publiclands.csv")
+
+summary(land)
+nrow(land)
+unique(land$State)
+
+missing_states <- tibble(State= c('Connecticut', 'Delawere', 'Hawai', 'Iowa', 'Maryland', 
+                                  'Massachusetts', 'New Jersey', 'Rhode Island'),
+                         PublicLandAcres=c(0,0,0,0,0,0,0,0))
+
+land <- rbind(land, missing_states)
+
+knitr::kable(
+  tail(land, 10),
+    digits=1, align=rep('c', 5))
+
+```
+
+\newpage
+
+## 1.4. Agregation and Missing Values
+
+\colorbox{yellow}{Sometimes when we calculate some statistics like sum or count, the result is NA because} \
+\colorbox{yellow}{R do not have all the values. In this case we need to add na.rm = TRUE.}\
+
+```{r Agregation, echo=TRUE, warning = TRUE}
+
+# Load the data file
+employees <- read_csv("./exercise_files/1_4/employees.csv")
+
+knitr::kable(employees, digits=1, align=rep('c', 5))
+
+sum(employees$Salary)
+mean(employees$Salary)
+max(employees$Salary)
+
+sum(employees$Salary, na.rm = TRUE)
+mean(employees$Salary, na.rm = TRUE)
+max(employees$Salary, na.rm = TRUE)
+
+```
+\newpage
+
+# 2. Duplicated Data
+
+\colorbox{yellow}{The df have two different of duplicated data, identical and not identical.}\
+
+## 2.1 Duplicate Rows and Values
+
+```{r continents, echo=TRUE, warning = TRUE}
+
+# Load the data file
+continents <- read_csv("./exercise_files/2_1/continents.csv")
+
+knitr::kable(continents, digits=1, align=rep('c', 5))
+
+continents <- unique(continents)
+
+continents <- continents %>% filter(!(Continent=='Antarctica' & Population>10000))
+
+knitr::kable(continents, digits=1, align=rep('c', 5))
+
+```
+
+\newpage
+
+
+## 2.2 Aggregations in the Dataset
+
+\colorbox{yellow}{When previously the data comes with aggregate rows, is necessary check that and remove them.}\
+
+```{r Aggregations in the Dataset, echo=TRUE, warning = TRUE}
+
+# Load the data file
+carpinteria <- read_csv("./exercise_files/2_2/population.csv")
+
+glimpse(carpinteria)
+sum(carpinteria$Population)
+
+knitr::kable(carpinteria, digits=1, align=rep('c', 5))
+
+carpinteria <- carpinteria %>%  filter(!(Subject %in% c('Total', 'Male', 'Female')))
+sum(carpinteria$Population)
+
+knitr::kable(carpinteria, digits=1, align=rep('c', 5))
+
+```
+\newpage
+
+# 3. Formating Data.
+
+\colorbox{yellow}{Lubridate can be used to de-constructing times, because the dates come in different formats.} \
+
+Example: \
+
+|                          |           |
+|:------------------------:|:---------:|
+| Abril 1, 2018            | mdy()     |
+| 2018-04-01               | ymd()     |
+| 01-04-2018               | dmy()     |
+| April 1, 2018 04:32:16   | mdy_hms() |
+
+
+## 3.1. Dates and Times in R
+
+```{r lubbridate,  echo = TRUE,	message = FALSE,	warning = FALSE}
+
+# Load the lubridate
+library(lubridate)
+
+```
+
+```{r, echo=TRUE, warning = TRUE}
+
+# Load the data file
+weather <- read_csv("./exercise_files/3_1/mexicanweather.csv")
+
+knitr::kable(
+  head(weather, 5),
+  digits=1, align=rep('c', 5))
+
+weather$year <- year(weather$date)
+weather$month <- month(weather$date)
+weather$day <- day(weather$date)
+
+knitr::kable(
+  head(weather, 5),
+  digits=1, align=rep('c', 5))
+
+# count day of week
+wday('2025-03-20')
+
+# count day of year
+yday('2025-03-20')
+
+#time to standard format
+mdy('03/20/2025')
+
+dmy('20/03/2025')
+
+```
+
+\newpage
+
+## 3.2. Converting Units
+
+\colorbox{yellow}{To transform degrees from/to others format is necessary transform min temp and max temp degrees using mutate.} \
+
+
+```{r conversions, echo=TRUE, warning = TRUE}
+
+# Load the data file
+weather <- read_csv("./exercise_files/3_2/mexicanweather.csv")
+
+# Let's make this dataset t a little wider to get the 
+# minimum and maximum temperatures as part of the same observation.
+# That requires the spread function
+weather <- weather %>%  spread(element, value)
+
+# That's the right format, but take a look at the data
+# It's pretty sparse.  We really don't need all of those lines that have two NA values
+weather <- weather %>%
+  filter(!(is.na(TMAX) & is.na(TMIN)))
+
+# Let's make those column names nicer
+# And just for tidyness, let's put the min before the max
+weather <- weather %>%
+  rename(maxtemp=TMAX, mintemp=TMIN) %>%
+  select(station, date, mintemp, maxtemp)
+
+knitr::kable(
+  head(weather, n=5),
+  digits=1, align=rep('c', 5))
+
+#To celcius
+
+weather <- weather %>%
+  mutate(mintemp=mintemp/10)  %>%
+  mutate(maxtemp=maxtemp/10)
+
+knitr::kable(
+  head(weather, n=5),
+  digits=1, align=rep('c', 5))
+
+#To fahrenheit
+
+weather <- weather %>%
+  mutate(mintemp=mintemp*(9/5)+32)  %>%
+  mutate(maxtemp=maxtemp*(9/5)+32)
+
+knitr::kable(
+  head(weather, n=5),
+  digits=1, align=rep('c', 5))
+
+
+```
+
+\newpage
+
+## 3.3. Converting Currency
+
+\colorbox{yellow}{In this exercise we add manual values to format names and data structure in a *.tsv file.} \
+\colorbox{yellow}{Some data was categorized as character instead of number.} \
+
+```{r inpatient, echo=TRUE, warning = TRUE}
+
+# Load the data file
+names <- c("DRG", "ProviderID", "Name", "Address", "City", "State", "ZIP", "Region",
+           "Discharges", "AverageCharges", "AverageTotalPayments", "AverageMedicarePayments")
+
+inpatient <- read_tsv("./exercise_files/3_3/inpatient.tsv", skip=1, col_names=names)
+
+summary(inpatient)
+
+types <- 'ciccccccinnn'
+
+inpatient <- read_tsv("./exercise_files/3_3/inpatient.tsv", skip=1, col_names=names, col_types = types)
+
+summary(inpatient)
+
+```
+
+\newpage
+
+## 3.4. Text Stored as Numbers
+
+\colorbox{yellow}{Sometimes when we load from excel file, is most easy and quickly change directly in the source. } \
+\colorbox{yellow}{In the exercise the ZIP code is not correct so we change the origin file with the correct data. } \
+
+```{r capitals, echo=TRUE, warning = TRUE}
+
+# Load the data file
+capitals <- read_csv("./exercise_files/3_4/capitals.csv")
+
+#head(capitals)
+tail(capitals)
+
+capitals <- read_csv("./exercise_files/3_4/capitals_corrected.csv")
+
+#head(capitals)
+tail(capitals)
+
+```
+
+\newpage
+
+## 3.5. Inconsistent Spellings
+
+\colorbox{yellow}{We can use grepl() to filter names as MCDONALD'S with inconsistent spellings.} \
+
+```{r inspections, echo=TRUE, warning = TRUE}
+# Load the data file
+names <- c('InspectionID', 'RestaurantName', 'OtherName', 'LicenseNumber', 'FacilityType', 'Risk', 
+           'Address', 'City', 'State', 'ZIP', 'InspectionDate', 'InspectionType', 'Results',
+           'Violations', 'Latitude', 'Longitude', 'Location')
+
+inspections <- read_csv("./exercise_files/3_5/inspections.csv", col_names=names, skip=1) 
+#skip=1 We indicate col_names
+
+inspections %>% 
+  group_by(RestaurantName) %>% 
+  summarize(inspections=n()) %>%
+  arrange(desc(inspections))  %>%
+  head()
+
+McDo <- 
+inspections %>% 
+  filter(grepl("McDo", RestaurantName, ignore.case = TRUE)) %>%
+  filter(RestaurantName!="SARAH MCDONALD STEELE") %>%
+  select(RestaurantName) %>%
+  unique() %>%
+  pull(RestaurantName) 
+
+head(McDo, n=12)
+
+inspections <- inspections %>%
+  mutate(RestaurantName= ifelse(RestaurantName %in% McDo, "MCDONALDs", RestaurantName))
+  
+inspections %>% 
+  group_by(RestaurantName) %>% 
+  summarize(inspections=n()) %>%
+  arrange(desc(inspections)) %>%
+  head()
+
+
+```
+
+\newpage
+
+# 4. Outliers
+## 4.3. Outliers Case Study
+
+\colorbox{yellow}{We use boxplot to grafic the outliers. The outliers and zero salary is mutate as NA is that example. } \
+
+```{r whitehouse,  echo=TRUE, warning = TRUE}
+
+# Load the data file
+whitehouse <- read_csv("./exercise_files/4_3/whitehouse.csv", col_types="ccncci")
+
+knitr::kable(
+  head(whitehouse, n=5),
+  digits=1, align=rep('c', 5))
+
+boxplot(whitehouse$Salary, horizontal=T)
+
+knitr::kable(
+  whitehouse %>%
+    filter(Salary>1000000 | Salary==0) %>%
+    arrange(desc(Salary)),
+  digits=1, align=rep('c', 5))
+
+whitehouse <- whitehouse %>% 
+  mutate(Salary=ifelse(Salary>1000000, NA, Salary)) %>%
+  mutate(Salary=ifelse(Salary==0, NA, Salary))
+  
+
+boxplot(whitehouse$Salary, horizontal=T)
+
+whitehouse %>% filter(Salary>200000) #Correct
+
+
+```
+\newpage
+
+## 4.4. Outliers Case Study
+
+\colorbox{yellow}{We use boxplot to grafic the outliers. Now i use mutate to change specifically a couple of data. } \
+
+```{r tests,  echo=TRUE, warning = TRUE}
+
+# Load the data file
+tests <- read_csv("./exercise_files/4_4/testscores.csv")
+
+summary(tests)
+#We detect age incorrect data
+
+boxplot(tests$age, horizontal=T)
+
+tests %>% filter(age>15)
+
+tests <- tests %>% 
+  mutate(age=ifelse(studentID==10115, 7, age)) %>%
+  mutate(age=ifelse(studentID==10116, 12, age))
+
+boxplot(tests$age, horizontal=T)
+
+boxplot(tests$age~tests$grade, horizontal=F)
+
+```
+
+\newpage
+
+## 4.5. Detecting Illogical Values
+
+```{r residents, echo=TRUE, warning = TRUE}
+
+# Load the data file
+residents <- read_csv("./exercise_files/4_5/residents.csv", col_types='iillll')
+
+summary(residents)
+
+knitr::kable(
+  residents %>% filter(ownsHome == rentsHome),
+  digits=1, align=rep('c', 5))
+
+```
+
+\newpage
+
+# 5. Tidy Data
+
+\colorbox{yellow}{Tidy data are all alike; every messy data set is in its own way. } \
+
+**Data wrangling:** (cleaning, munging, and preparation) is not a one-time task.\
+We encounter new problems, new data sets, ans new ideas regularly.
+
+Tidy data have: \
+
+* Variables (column)
+* Observations (row)
+* Values (each all box | unit forms in a table) \
+
+[https://github.com/quartz/bad-data-guide?tab=readme-ov-file#data-are-in-a-pdf](https://github.com/quartz/bad-data-guide?tab=readme-ov-file#data-are-in-a-pdf)
+
+[http://vita.had.co.nz/papers/tidy-data.pdf](http://vita.had.co.nz/papers/tidy-data.pdf)
+
+
+## 5.5. Making Wide Datasets Long
+
+```{r pew, echo=TRUE, warning = TRUE}
+
+# Load the data file
+pew <- read_csv("./exercise_files/5_5/pew.csv")
+
+knitr::kable(
+  head(pew),
+  digits=1, align=rep('c', 5))
+
+pew.long <- gather(pew, income, frec, -religion)
+
+knitr::kable(
+  head(pew.long),
+  digits=1, align=rep('c', 5))
+
+```
+
+## 5.6. Making Long Datasets Wide
+
+```{r Making Long Datasets Wide, echo=TRUE, warning = TRUE}
+
+# Load the data file
+weather <- read_csv("./exercise_files/5_6/mexicanweather.csv")
+
+knitr::kable(
+  head(weather),
+  digits=1, align=rep('c', 5))
+
+weather.wide <- spread(weather, element, value)
+
+knitr::kable(
+  head(weather.wide),
+  digits=1, align=rep('c', 5))
+
+```
+
+\newpage
+
+# 6. Cleaning
+
+```{r ,  echo=TRUE, warning = TRUE}
+
+firstname <- c('Luis', 'Pamela', 'Blanca')
+lastname <- c('Fernandez', 'Matus', 'Cerda')
+phone <- c(923456789, 987654321, 932465897)
+CreditCard <- c('5555-1234-4752-2546',
+                '5555-4321-3688-2554',
+                '5555-5826-3214-7789')
+
+payments <- data.frame(firstname, lastname, phone, CreditCard)
+
+library(digest)
+
+# Deleting variable
+ payments |>   select(-CreditCard)
+
+# Marking
+ payments |>   mutate(CreditCard = gsub('\\d', '*', CreditCard))
+
+# Partial redact
+ payments |> mutate(CreditCard=paste0('****-****-****-',
+                                      substr(CreditCard, 
+                                             nchar(CreditCard)-3, 
+                                             nchar(CreditCard))))
+
+# Hach
+payments |> mutate(CreditCard = sapply(CreditCard, digest, algo='sha256'))
+
+```
 
