@@ -1,4 +1,4 @@
-## Cleaning-Bad-Data-in-R
+## Cleaning Bad Data in R
 
 ![](https://uploads1.wikiart.org/00475/images/salvador-dali/w1siziisijm4njq3mcjdlfsiccisimnvbnzlcnqilcitcxvhbgl0esa5mcatcmvzaxplidiwmdb4mjawmfx1mdazzsjdxq.jpg!Large.jpg)    
 *La persistencia de la memoria, Salvador Dalí, 1931 (wikiart.org).*
