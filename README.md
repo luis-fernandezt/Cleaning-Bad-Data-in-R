@@ -3,7 +3,7 @@
 ![](https://uploads1.wikiart.org/00475/images/salvador-dali/w1siziisijm4njq3mcjdlfsiccisimnvbnzlcnqilcitcxvhbgl0esa5mcatcmvzaxplidiwmdb4mjawmfx1mdazzsjdxq.jpg!Large.jpg)    
 *La persistencia de la memoria, Salvador Dalí, 1931 (wikiart.org).*
 
-Discover in this Markdown file, how to handle missing values and duplicated data. Find out how to convert data between different units and tackle poorly formatted text. Plus, learn how to detect outliers, address structural issues, and identify red flags that indicate potential data quality issues.
+Discover in this [Markdown file](https://github.com/luis-fernandezt/Cleaning-Bad-Data-in-R/blob/main/Missing%20Data.Rmd), how to handle missing values and duplicated data. Find out how to convert data between different units and tackle poorly formatted text. Plus, learn how to detect outliers, address structural issues, and identify red flags that indicate potential data quality issues.
 
 ##### 1. Missing Data
   ###### 1.2. Missing Fields
