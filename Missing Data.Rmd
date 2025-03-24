@@ -1,0 +1,115 @@
+---
+title: "Cleaning-Bad-Data-in-R"
+autor: "Luis Fernández"
+date: "`r Sys.Date()`"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  echo = FALSE,
+	message = FALSE,
+	warning = FALSE)
+```
+
+# 1. Missing Data
+
+## 1.2. Missing Fields
+
+After loading the heating data I need to transform and format some values. When I apply mutate to transform homes `heating %>% mutate(homes = as.numeric(homes))` from Class: character, R show me a \textcolor{red}{Caused by warning: ! NAs introducidos por coerción}. Then I ask for the data using a filter and found characters values (".", "Z"). Finally mutate the values to zero after check with other sources. 
+\
+
+```{r library, echo = TRUE,	message = FALSE,	warning = FALSE}
+# Load the tidyverse
+library(tidyverse)
+```
+
+
+```{r exc1, include=TRUE, echo=TRUE, warning = TRUE}
+
+# Load the data file
+heating <- read_csv("./exercise_files/1_2/heating.csv")
+
+# Tidy the data
+heating <- heating %>% gather(key="age", value="homes", -Source)
+
+knitr::kable(
+  summary(heating),
+  digits=1, align=rep('c', 5))
+  
+knitr::kable(
+  head(heating %>% mutate(homes = as.numeric(homes)), 7),
+   digits=1, align=rep('c', 5))
+
+knitr::kable(
+  heating %>% filter(is.na(as.numeric(homes))),
+  digits=1, align=rep('c', 5))
+
+```
+
+
+```{r exc2, echo=TRUE, warning = TRUE}
+
+heating <- 
+  heating %>%
+  mutate(homes=ifelse(homes=='.', 0, homes)) %>% 
+  mutate(homes=ifelse(homes=='Z', 0, homes)) %>% 
+  mutate(homes = as.numeric(homes))
+
+  summary(heating)
+
+```
+
+\newpage
+
+## 1.3. Missing Rows
+
+\colorbox{yellow}{In this exercise I have lands acres from USA, but there are just 42 obs, however the count of states are 50.} \
+\colorbox{yellow}{So is necessary create a data table in tiddy format with the other ones.} \
+
+```{r Missing Rows, echo=TRUE, warning = TRUE}
+
+# Load the data file
+land <- read_csv("./exercise_files/1_3/publiclands.csv")
+
+summary(land)
+nrow(land)
+unique(land$State)
+
+missing_states <- tibble(State= c('Connecticut', 'Delawere', 'Hawai', 'Iowa', 'Maryland', 
+                                  'Massachusetts', 'New Jersey', 'Rhode Island'),
+                         PublicLandAcres=c(0,0,0,0,0,0,0,0))
+
+land <- rbind(land, missing_states)
+
+knitr::kable(
+  tail(land, 10),
+    digits=1, align=rep('c', 5))
+
+```
+
+\newpage
+
+## 1.4. Agregation and Missing Values
+
+\colorbox{yellow}{Sometimes when we calculate some statistics like sum or count, the result is NA because} \
+\colorbox{yellow}{R do not have all the values. In this case we need to add na.rm = TRUE.}\
+
+```{r Agregation, echo=TRUE, warning = TRUE}
+
+# Load the data file
+employees <- read_csv("./exercise_files/1_4/employees.csv")
+
+knitr::kable(employees, digits=1, align=rep('c', 5))
+
+sum(employees$Salary)
+mean(employees$Salary)
+max(employees$Salary)
+
+sum(employees$Salary, na.rm = TRUE)
+mean(employees$Salary, na.rm = TRUE)
+max(employees$Salary, na.rm = TRUE)
+
+```
+\newpage
+
